@@ -1,135 +1,181 @@
-const STORAGE_KEY = "entertainment-invest-v1";
+const STORAGE_KEY = "entertainment-invest-v2";
+const LEGACY_STORAGE_KEY = "entertainment-invest-v1";
 
 const state = {
   month: new Date(),
   detailType: "expense",
-  records: loadRecords()
+  records: loadRecords(),
+  pendingDeleteId: null
 };
 
 const el = id => document.getElementById(id);
-const formatMoney = n => `NT$ ${Math.round(n).toLocaleString("zh-TW")}`;
-const monthKey = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-const todayString = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-};
 
 function loadRecords() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch {
-    return [];
+  const candidates = [STORAGE_KEY, LEGACY_STORAGE_KEY];
+  for (const key of candidates) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map(normalizeRecord);
+      }
+    } catch {}
   }
+  return [];
+}
+
+function normalizeRecord(record) {
+  return {
+    id: record.id || makeId(),
+    type: record.type === "investment" ? "investment" : "expense",
+    date: record.date,
+    amount: Number(record.amount) || 0,
+    note: String(record.note || "")
+  };
+}
+
+function makeId() {
+  return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
 }
 
 function saveRecords() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.records));
 }
 
-function currentMonthRecords() {
-  const key = monthKey(state.month);
-  return state.records.filter(r => r.date.startsWith(key));
+function formatMoney(value) {
+  return `NT$ ${Math.round(value).toLocaleString("zh-TW")}`;
 }
 
-function totals() {
-  const list = currentMonthRecords();
-  const expense = list.filter(r => r.type === "expense").reduce((s, r) => s + r.amount, 0);
-  const investment = list.filter(r => r.type === "investment").reduce((s, r) => s + r.amount, 0);
-  return { expense, investment, pending: Math.max(expense - investment, 0) };
+function monthKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function todayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function currentMonthRecords() {
+  const key = monthKey(state.month);
+  return state.records.filter(record => record.date?.startsWith(key));
+}
+
+function calculateTotals() {
+  const records = currentMonthRecords();
+  const expense = records
+    .filter(record => record.type === "expense")
+    .reduce((sum, record) => sum + record.amount, 0);
+  const investment = records
+    .filter(record => record.type === "investment")
+    .reduce((sum, record) => sum + record.amount, 0);
+
+  return {
+    expense,
+    investment,
+    pending: Math.max(expense - investment, 0)
+  };
 }
 
 function render() {
-  const { expense, investment, pending } = totals();
-  const progress = expense === 0 ? 0 : Math.min(100, Math.round(investment / expense * 100));
+  const totals = calculateTotals();
+  const progress = totals.expense === 0
+    ? 0
+    : Math.min(100, Math.round((totals.investment / totals.expense) * 100));
 
   el("monthLabel").textContent = `${state.month.getFullYear()} 年 ${state.month.getMonth() + 1} 月`;
-  el("expenseTotal").textContent = formatMoney(expense);
-  el("investmentTotal").textContent = formatMoney(investment);
-  el("pendingTotal").textContent = formatMoney(pending);
+  el("expenseTotal").textContent = formatMoney(totals.expense);
+  el("investmentTotal").textContent = formatMoney(totals.investment);
+  el("pendingTotal").textContent = formatMoney(totals.pending);
   el("progressBar").style.width = `${progress}%`;
   el("progressText").textContent = `本月已完成 ${progress}%`;
-  el("pendingStatus").textContent = pending === 0 && expense > 0 ? "本月已補足" : "尚未補足";
 
-  const list = currentMonthRecords();
-  el("expenseCount").textContent = list.filter(r => r.type === "expense").length;
-  el("investmentCount").textContent = list.filter(r => r.type === "investment").length;
+  const completed = totals.expense > 0 && totals.pending === 0;
+  el("pendingStatus").textContent = completed ? "本月已補足" : "尚未補足";
+  el("pendingStatus").classList.toggle("complete", completed);
+
+  const records = currentMonthRecords();
+  el("expenseCount").textContent = records.filter(record => record.type === "expense").length;
+  el("investmentCount").textContent = records.filter(record => record.type === "investment").length;
 
   renderRecords();
 }
 
 function renderRecords() {
   const records = currentMonthRecords()
-    .filter(r => r.type === state.detailType)
-    .sort((a,b) => b.date.localeCompare(a.date));
+    .filter(record => record.type === state.detailType)
+    .sort((a, b) => b.date.localeCompare(a.date));
 
   const container = el("recordList");
   container.innerHTML = "";
 
   if (!records.length) {
-    container.innerHTML = `<div class="empty-state">這個月份尚無${state.detailType === "expense" ? "娛樂費" : "股票投入"}紀錄。</div>`;
+    const typeName = state.detailType === "expense" ? "娛樂費" : "股票投入";
+    container.innerHTML = `<div class="empty-state">這個月份尚無${typeName}紀錄。</div>`;
     return;
   }
 
   records.forEach(record => {
-    const row = document.createElement("div");
-    row.className = "record-item";
-    row.innerHTML = `
-      <div class="record-date">${record.date.slice(5).replace("-", "/")}</div>
-      <div class="record-note">${escapeHtml(record.note || "無備註")}</div>
-      <div class="record-amount">${state.detailType === "expense" ? "+" : "-"}${formatMoney(record.amount)}</div>
-      <button class="delete-record" aria-label="刪除紀錄" data-id="${record.id}">×</button>
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "record-item";
+    button.dataset.id = record.id;
+    button.innerHTML = `
+      <span class="record-date">${record.date.slice(5).replace("-", "/")}</span>
+      <span class="record-note">${escapeHtml(record.note || "無備註")}</span>
+      <span class="record-amount">${record.type === "expense" ? "+" : "-"}${formatMoney(record.amount)}</span>
+      <span class="record-arrow">›</span>
     `;
-    container.appendChild(row);
-  });
-
-  container.querySelectorAll(".delete-record").forEach(button => {
-    button.addEventListener("click", () => {
-      state.records = state.records.filter(r => r.id !== button.dataset.id);
-      saveRecords();
-      render();
-    });
+    button.addEventListener("click", () => openEditDialog(record.id));
+    container.appendChild(button);
   });
 }
 
 function escapeHtml(value) {
-  return value.replace(/[&<>"']/g, ch => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  })[ch]);
+  return String(value).replace(/[&<>"']/g, character => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  })[character]);
 }
 
 function addRecord(type) {
-  const date = el(type === "expense" ? "expenseDate" : "investmentDate").value;
-  const amountInput = el(type === "expense" ? "expenseAmount" : "investmentAmount");
-  const noteInput = el(type === "expense" ? "expenseNote" : "investmentNote");
-  const amount = Number(amountInput.value);
+  const prefix = type === "expense" ? "expense" : "investment";
+  const date = el(`${prefix}Date`).value;
+  const amount = Number(el(`${prefix}Amount`).value);
+  const note = el(`${prefix}Note`).value.trim();
 
   if (!date || !Number.isFinite(amount) || amount <= 0) {
-    el("message").textContent = "請輸入日期與正確金額。";
+    showMessage("請輸入日期與正確金額。");
     return;
   }
 
   state.records.push({
-    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+    id: makeId(),
     type,
     date,
     amount,
-    note: noteInput.value.trim()
+    note
   });
 
   state.month = new Date(`${date}T00:00:00`);
   saveRecords();
-  amountInput.value = "";
-  noteInput.value = "";
-  el("message").textContent = type === "expense" ? "已新增娛樂費。" : "已紀錄股票投入。";
+
+  el(`${prefix}Amount`).value = "";
+  el(`${prefix}Note`).value = "";
+
+  showMessage(type === "expense" ? "已新增娛樂費。" : "已紀錄股票投入。");
   render();
 }
 
 function setEntryTab(type) {
-  const expense = type === "expense";
-  el("expenseEntryTab").classList.toggle("active", expense);
-  el("investmentEntryTab").classList.toggle("active", !expense);
-  el("expensePanel").classList.toggle("hidden", !expense);
-  el("investmentPanel").classList.toggle("hidden", expense);
+  const isExpense = type === "expense";
+  el("expenseEntryTab").classList.toggle("active", isExpense);
+  el("investmentEntryTab").classList.toggle("active", !isExpense);
+  el("expensePanel").classList.toggle("hidden", !isExpense);
+  el("investmentPanel").classList.toggle("hidden", isExpense);
 }
 
 function setDetailTab(type) {
@@ -144,36 +190,112 @@ function changeMonth(delta) {
   render();
 }
 
+function showMessage(text) {
+  el("message").textContent = text;
+  window.clearTimeout(showMessage.timer);
+  showMessage.timer = window.setTimeout(() => {
+    el("message").textContent = "";
+  }, 2600);
+}
+
+function openEditDialog(id) {
+  const record = state.records.find(item => item.id === id);
+  if (!record) return;
+
+  el("editRecordId").value = record.id;
+  el("editDate").value = record.date;
+  el("editAmount").value = record.amount;
+  el("editNote").value = record.note;
+  el("editTitle").textContent = record.type === "expense" ? "編輯娛樂費" : "編輯股票投入";
+  el("editTypeLabel").textContent = record.type === "expense" ? "娛樂費紀錄" : "股票投入紀錄";
+  el("editDialog").showModal();
+}
+
+function saveEdit() {
+  const id = el("editRecordId").value;
+  const record = state.records.find(item => item.id === id);
+  if (!record) return;
+
+  const date = el("editDate").value;
+  const amount = Number(el("editAmount").value);
+  const note = el("editNote").value.trim();
+
+  if (!date || !Number.isFinite(amount) || amount <= 0) {
+    alert("請輸入日期與正確金額。");
+    return;
+  }
+
+  record.date = date;
+  record.amount = amount;
+  record.note = note;
+  state.month = new Date(`${date}T00:00:00`);
+
+  saveRecords();
+  el("editDialog").close();
+  showMessage("紀錄已修改。");
+  render();
+}
+
+function requestDeleteRecord() {
+  state.pendingDeleteId = el("editRecordId").value;
+  el("editDialog").close();
+  el("deleteConfirmDialog").showModal();
+}
+
+function confirmDeleteRecord() {
+  if (!state.pendingDeleteId) return;
+  state.records = state.records.filter(record => record.id !== state.pendingDeleteId);
+  state.pendingDeleteId = null;
+  saveRecords();
+  el("deleteConfirmDialog").close();
+  showMessage("紀錄已刪除。");
+  render();
+}
+
+function clearCurrentMonth() {
+  const key = monthKey(state.month);
+  state.records = state.records.filter(record => !record.date.startsWith(key));
+  saveRecords();
+  el("clearMonthConfirmDialog").close();
+  showMessage("本月紀錄已清空。");
+  render();
+}
+
 function exportData() {
   const payload = {
     app: "entertainment-invest",
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     records: state.records
   };
+
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `娛樂費轉投資_${todayString()}.json`;
-  a.click();
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `娛樂費轉投資_${todayString()}.json`;
+  anchor.click();
   URL.revokeObjectURL(url);
 }
 
 function importData(file) {
   const reader = new FileReader();
+
   reader.onload = () => {
     try {
       const payload = JSON.parse(reader.result);
-      if (!Array.isArray(payload.records)) throw new Error();
-      state.records = payload.records;
+      const records = Array.isArray(payload) ? payload : payload.records;
+      if (!Array.isArray(records)) throw new Error("invalid");
+
+      state.records = records.map(normalizeRecord);
       saveRecords();
       render();
-      el("message").textContent = "備份資料已匯入。";
+      showMessage("備份資料已匯入。");
     } catch {
-      el("message").textContent = "備份檔格式不正確。";
+      showMessage("備份檔格式不正確。");
     }
   };
+
   reader.readAsText(file);
 }
 
@@ -182,12 +304,51 @@ el("investmentDate").value = todayString();
 
 el("prevMonth").addEventListener("click", () => changeMonth(-1));
 el("nextMonth").addEventListener("click", () => changeMonth(1));
+
 el("expenseEntryTab").addEventListener("click", () => setEntryTab("expense"));
 el("investmentEntryTab").addEventListener("click", () => setEntryTab("investment"));
+
 el("expenseDetailTab").addEventListener("click", () => setDetailTab("expense"));
 el("investmentDetailTab").addEventListener("click", () => setDetailTab("investment"));
+
 el("addExpense").addEventListener("click", () => addRecord("expense"));
 el("addInvestment").addEventListener("click", () => addRecord("investment"));
+
+el("monthButton").addEventListener("click", () => {
+  el("monthPicker").value = monthKey(state.month);
+  el("monthDialog").showModal();
+});
+
+el("applyMonth").addEventListener("click", event => {
+  event.preventDefault();
+  const value = el("monthPicker").value;
+  if (!value) return;
+  state.month = new Date(`${value}-01T00:00:00`);
+  el("monthDialog").close();
+  render();
+});
+
+el("saveEdit").addEventListener("click", saveEdit);
+el("deleteRecord").addEventListener("click", requestDeleteRecord);
+el("confirmDeleteRecord").addEventListener("click", event => {
+  event.preventDefault();
+  confirmDeleteRecord();
+});
+
+el("openMonthActions").addEventListener("click", () => {
+  el("monthActionsDialog").showModal();
+});
+
+el("clearCurrentMonth").addEventListener("click", () => {
+  el("monthActionsDialog").close();
+  el("clearMonthConfirmDialog").showModal();
+});
+
+el("confirmClearMonth").addEventListener("click", event => {
+  event.preventDefault();
+  clearCurrentMonth();
+});
+
 el("exportData").addEventListener("click", exportData);
 
 el("importData").addEventListener("change", event => {
@@ -196,31 +357,10 @@ el("importData").addEventListener("change", event => {
   event.target.value = "";
 });
 
-el("deleteAllCurrentMonth").addEventListener("click", () => {
-  if (!confirm("確定要清空目前月份的全部紀錄？")) return;
-  const key = monthKey(state.month);
-  state.records = state.records.filter(r => !r.date.startsWith(key));
-  saveRecords();
-  render();
-});
-
-const dialog = el("monthDialog");
-el("monthButton").addEventListener("click", () => {
-  el("monthPicker").value = monthKey(state.month);
-  dialog.showModal();
-});
-el("applyMonth").addEventListener("click", event => {
-  event.preventDefault();
-  const value = el("monthPicker").value;
-  if (value) {
-    state.month = new Date(`${value}-01T00:00:00`);
-    dialog.close();
-    render();
-  }
-});
-
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js"));
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js");
+  });
 }
 
 render();

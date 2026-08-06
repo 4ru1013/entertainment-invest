@@ -15,25 +15,27 @@
 <body>
   <main class="app-shell">
     <header class="topbar">
-      <button class="icon-button" id="prevMonth" aria-label="上一個月">‹</button>
-      <div class="month-title">
-        <button id="monthButton" class="month-button">
-          <span id="monthLabel">2026 年 8 月</span>
-          <span class="chevron">⌄</span>
-        </button>
-        <p>娛樂支出轉為股票投入</p>
+      <button class="menu-button" aria-label="選單">☰</button>
+      <button id="monthButton" class="month-button" type="button">
+        <span id="monthLabel">2026 年 8 月</span>
+        <span class="month-arrow">⌄</span>
+        <small>娛樂支出轉為股票投入</small>
+      </button>
+      <div class="month-nav">
+        <button id="prevMonth" class="icon-button" type="button" aria-label="上一個月">‹</button>
+        <button id="nextMonth" class="icon-button" type="button" aria-label="下一個月">›</button>
       </div>
-      <button class="icon-button" id="nextMonth" aria-label="下一個月">›</button>
     </header>
 
     <section class="summary-grid">
       <article class="summary-card">
-        <div class="summary-icon">🎟️</div>
+        <div class="summary-icon">🎟</div>
         <div>
           <p>本月娛樂費</p>
           <strong id="expenseTotal">NT$ 0</strong>
         </div>
       </article>
+
       <article class="summary-card">
         <div class="summary-icon">↗</div>
         <div>
@@ -54,8 +56,9 @@
         </div>
         <span id="pendingStatus" class="status-pill">尚未補足</span>
       </div>
+
       <div class="progress-track">
-        <div class="progress-bar" id="progressBar"></div>
+        <div id="progressBar" class="progress-bar"></div>
       </div>
       <div class="progress-meta">
         <span id="progressText">本月已完成 0%</span>
@@ -65,71 +68,83 @@
 
     <section class="entry-card">
       <div class="entry-tabs">
-        <button class="entry-tab active" id="expenseEntryTab">新增娛樂費</button>
-        <button class="entry-tab" id="investmentEntryTab">紀錄股票投入</button>
+        <button id="expenseEntryTab" class="entry-tab active" type="button">新增娛樂費</button>
+        <button id="investmentEntryTab" class="entry-tab" type="button">紀錄股票投入</button>
       </div>
 
-      <div class="entry-panel" id="expensePanel">
+      <div id="expensePanel" class="entry-panel">
         <label>
           <span>日期</span>
-          <input type="date" id="expenseDate" />
+          <input id="expenseDate" type="date" />
         </label>
+
         <label>
           <span>娛樂費金額</span>
-          <div class="amount-input"><input type="number" id="expenseAmount" min="0" inputmode="numeric" placeholder="例如：680" /><span>元</span></div>
+          <div class="amount-input">
+            <input id="expenseAmount" type="number" min="0" inputmode="numeric" placeholder="例如：680" />
+            <span>元</span>
+          </div>
         </label>
+
         <label>
           <span>備註</span>
-          <input type="text" id="expenseNote" placeholder="例如：聚餐、電影、演唱會" />
+          <input id="expenseNote" type="text" maxlength="60" placeholder="例如：聚餐、電影、演唱會" />
         </label>
-        <button class="primary-button" id="addExpense">加入本月娛樂費</button>
+
+        <button id="addExpense" class="primary-button" type="button">加入本月娛樂費</button>
       </div>
 
-      <div class="entry-panel hidden" id="investmentPanel">
+      <div id="investmentPanel" class="entry-panel hidden">
         <label>
           <span>日期</span>
-          <input type="date" id="investmentDate" />
+          <input id="investmentDate" type="date" />
         </label>
+
         <label>
           <span>投入金額</span>
-          <div class="amount-input"><input type="number" id="investmentAmount" min="0" inputmode="numeric" placeholder="例如：1500" /><span>元</span></div>
+          <div class="amount-input">
+            <input id="investmentAmount" type="number" min="0" inputmode="numeric" placeholder="例如：1500" />
+            <span>元</span>
+          </div>
         </label>
+
         <label>
           <span>股票與備註</span>
-          <input type="text" id="investmentNote" placeholder="例如：0050 零股" />
+          <input id="investmentNote" type="text" maxlength="60" placeholder="例如：0050 零股" />
         </label>
-        <button class="primary-button" id="addInvestment">紀錄股票投入</button>
+
+        <button id="addInvestment" class="primary-button" type="button">紀錄股票投入</button>
       </div>
 
-      <p class="message" id="message" aria-live="polite"></p>
+      <p id="message" class="message" aria-live="polite"></p>
     </section>
 
     <section class="detail-section">
       <div class="section-title">
         <h2>明細紀錄</h2>
-        <button class="text-button" id="deleteAllCurrentMonth">清空本月</button>
+        <button id="openMonthActions" class="filter-button" type="button">⋯</button>
       </div>
 
       <div class="detail-tabs">
-        <button class="detail-tab active" id="expenseDetailTab">
+        <button id="expenseDetailTab" class="detail-tab active" type="button">
           娛樂費明細 <span id="expenseCount">0</span>
         </button>
-        <button class="detail-tab" id="investmentDetailTab">
+        <button id="investmentDetailTab" class="detail-tab" type="button">
           股票投入明細 <span id="investmentCount">0</span>
         </button>
       </div>
 
-      <div class="record-list" id="recordList"></div>
+      <div id="recordList" class="record-list"></div>
     </section>
 
     <section class="backup-card">
       <h2>資料備份</h2>
-      <p>資料只儲存在這台裝置。建議定期匯出備份檔。</p>
+      <p>資料只儲存在這台裝置。清除 Safari 網站資料或更換手機前，請先匯出備份。</p>
       <div class="backup-actions">
-        <button class="secondary-button" id="exportData">匯出備份</button>
+        <button id="exportData" class="secondary-button" type="button">匯出備份</button>
         <label class="secondary-button file-label">
           匯入備份
-          <input type="file" id="importData" accept=".json,application/json" />
+          <input id="importData" type="file" accept=".json,application/json" />
         </label>
       </div>
     </section>
@@ -138,10 +153,77 @@
   <dialog id="monthDialog">
     <form method="dialog" class="dialog-card">
       <h2>選擇月份</h2>
-      <input type="month" id="monthPicker" />
+      <input id="monthPicker" type="month" />
       <div class="dialog-actions">
-        <button value="cancel" class="secondary-button">取消</button>
-        <button value="default" id="applyMonth" class="primary-button">套用</button>
+        <button class="secondary-button" value="cancel">取消</button>
+        <button id="applyMonth" class="primary-button" value="default">套用</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="editDialog">
+    <form method="dialog" class="dialog-card">
+      <div class="dialog-heading">
+        <div>
+          <small id="editTypeLabel">編輯紀錄</small>
+          <h2 id="editTitle">編輯娛樂費</h2>
+        </div>
+        <button class="close-button" value="cancel" aria-label="關閉">×</button>
+      </div>
+
+      <input id="editRecordId" type="hidden" />
+
+      <label>
+        <span>日期</span>
+        <input id="editDate" type="date" />
+      </label>
+
+      <label>
+        <span>金額</span>
+        <div class="amount-input">
+          <input id="editAmount" type="number" min="0" inputmode="numeric" />
+          <span>元</span>
+        </div>
+      </label>
+
+      <label>
+        <span>備註</span>
+        <input id="editNote" type="text" maxlength="60" />
+      </label>
+
+      <div class="edit-actions">
+        <button id="deleteRecord" class="danger-button" type="button">刪除紀錄</button>
+        <button id="saveEdit" class="primary-button" type="button">儲存修改</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="deleteConfirmDialog">
+    <form method="dialog" class="dialog-card compact-dialog">
+      <h2>確定刪除這筆紀錄？</h2>
+      <p>刪除後無法復原。</p>
+      <div class="dialog-actions">
+        <button class="secondary-button" value="cancel">取消</button>
+        <button id="confirmDeleteRecord" class="danger-button" value="default">刪除</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="monthActionsDialog">
+    <form method="dialog" class="dialog-card compact-dialog">
+      <h2>本月資料</h2>
+      <button id="clearCurrentMonth" class="danger-button full-button" type="button">清空本月全部紀錄</button>
+      <button class="secondary-button full-button" value="cancel">取消</button>
+    </form>
+  </dialog>
+
+  <dialog id="clearMonthConfirmDialog">
+    <form method="dialog" class="dialog-card compact-dialog">
+      <h2>確定清空本月紀錄？</h2>
+      <p>本月的娛樂費與股票投入紀錄都會刪除，且無法復原。</p>
+      <div class="dialog-actions">
+        <button class="secondary-button" value="cancel">取消</button>
+        <button id="confirmClearMonth" class="danger-button" value="default">全部刪除</button>
       </div>
     </form>
   </dialog>

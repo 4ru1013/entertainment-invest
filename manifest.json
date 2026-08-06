@@ -4,7 +4,7 @@
   "description": "將每月娛樂支出轉為股票投入的簡易紀錄工具",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#F7F3FF",
+  "background_color": "#F8F5FF",
   "theme_color": "#7C3AED",
   "lang": "zh-Hant",
   "icons": [
