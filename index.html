@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#7C3AED" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="娛樂轉投資" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+  <title>娛樂費轉投資</title>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <button class="icon-button" id="prevMonth" aria-label="上一個月">‹</button>
+      <div class="month-title">
+        <button id="monthButton" class="month-button">
+          <span id="monthLabel">2026 年 8 月</span>
+          <span class="chevron">⌄</span>
+        </button>
+        <p>娛樂支出轉為股票投入</p>
+      </div>
+      <button class="icon-button" id="nextMonth" aria-label="下一個月">›</button>
+    </header>
+
+    <section class="summary-grid">
+      <article class="summary-card">
+        <div class="summary-icon">🎟️</div>
+        <div>
+          <p>本月娛樂費</p>
+          <strong id="expenseTotal">NT$ 0</strong>
+        </div>
+      </article>
+      <article class="summary-card">
+        <div class="summary-icon">↗</div>
+        <div>
+          <p>本月股票投入</p>
+          <strong id="investmentTotal">NT$ 0</strong>
+        </div>
+      </article>
+    </section>
+
+    <section class="pending-card">
+      <div class="pending-head">
+        <div class="pending-info">
+          <div class="summary-icon">🪙</div>
+          <div>
+            <p>目前待投資</p>
+            <strong id="pendingTotal">NT$ 0</strong>
+          </div>
+        </div>
+        <span id="pendingStatus" class="status-pill">尚未補足</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-meta">
+        <span id="progressText">本月已完成 0%</span>
+        <span>目標：將娛樂費全數投入</span>
+      </div>
+    </section>
+
+    <section class="entry-card">
+      <div class="entry-tabs">
+        <button class="entry-tab active" id="expenseEntryTab">新增娛樂費</button>
+        <button class="entry-tab" id="investmentEntryTab">紀錄股票投入</button>
+      </div>
+
+      <div class="entry-panel" id="expensePanel">
+        <label>
+          <span>日期</span>
+          <input type="date" id="expenseDate" />
+        </label>
+        <label>
+          <span>娛樂費金額</span>
+          <div class="amount-input"><input type="number" id="expenseAmount" min="0" inputmode="numeric" placeholder="例如：680" /><span>元</span></div>
+        </label>
+        <label>
+          <span>備註</span>
+          <input type="text" id="expenseNote" placeholder="例如：聚餐、電影、演唱會" />
+        </label>
+        <button class="primary-button" id="addExpense">加入本月娛樂費</button>
+      </div>
+
+      <div class="entry-panel hidden" id="investmentPanel">
+        <label>
+          <span>日期</span>
+          <input type="date" id="investmentDate" />
+        </label>
+        <label>
+          <span>投入金額</span>
+          <div class="amount-input"><input type="number" id="investmentAmount" min="0" inputmode="numeric" placeholder="例如：1500" /><span>元</span></div>
+        </label>
+        <label>
+          <span>股票與備註</span>
+          <input type="text" id="investmentNote" placeholder="例如：0050 零股" />
+        </label>
+        <button class="primary-button" id="addInvestment">紀錄股票投入</button>
+      </div>
+
+      <p class="message" id="message" aria-live="polite"></p>
+    </section>
+
+    <section class="detail-section">
+      <div class="section-title">
+        <h2>明細紀錄</h2>
+        <button class="text-button" id="deleteAllCurrentMonth">清空本月</button>
+      </div>
+
+      <div class="detail-tabs">
+        <button class="detail-tab active" id="expenseDetailTab">
+          娛樂費明細 <span id="expenseCount">0</span>
+        </button>
+        <button class="detail-tab" id="investmentDetailTab">
+          股票投入明細 <span id="investmentCount">0</span>
+        </button>
+      </div>
+
+      <div class="record-list" id="recordList"></div>
+    </section>
+
+    <section class="backup-card">
+      <h2>資料備份</h2>
+      <p>資料只儲存在這台裝置。建議定期匯出備份檔。</p>
+      <div class="backup-actions">
+        <button class="secondary-button" id="exportData">匯出備份</button>
+        <label class="secondary-button file-label">
+          匯入備份
+          <input type="file" id="importData" accept=".json,application/json" />
+        </label>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="monthDialog">
+    <form method="dialog" class="dialog-card">
+      <h2>選擇月份</h2>
+      <input type="month" id="monthPicker" />
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary-button">取消</button>
+        <button value="default" id="applyMonth" class="primary-button">套用</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
