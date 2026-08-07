@@ -30,7 +30,10 @@ function normalizeRecord(record) {
 }
 
 function loadRecords() {
-  for (const key of [STORAGE_KEY, ...LEGACY_KEYS]) {
+  const keys = [STORAGE_KEY, ...LEGACY_KEYS];
+  let firstValidEmpty = null;
+
+  for (const key of keys) {
     try {
       const raw = localStorage.getItem(key);
       if (!raw) continue;
@@ -38,20 +41,29 @@ function loadRecords() {
       const parsed = JSON.parse(raw);
       const list = Array.isArray(parsed) ? parsed : parsed.records;
 
-      if (Array.isArray(list)) {
-        const records = list.map(normalizeRecord);
+      if (!Array.isArray(list)) continue;
 
-        // Once legacy data is found, copy it into the V3 key.
-        if (key !== STORAGE_KEY) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-        }
-        return records;
+      const records = list.map(normalizeRecord);
+
+      // 核心修正：
+      // 若新版 key 曾被錯誤寫成 []，不要因此擋住舊版真正的資料。
+      if (records.length === 0) {
+        if (firstValidEmpty === null) firstValidEmpty = [];
+        continue;
       }
+
+      // 找到第一份非空資料後，正式遷移到 V3 key。
+      if (key !== STORAGE_KEY) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      }
+
+      return records;
     } catch (error) {
       console.warn("Unable to read stored records:", key, error);
     }
   }
-  return [];
+
+  return firstValidEmpty || [];
 }
 
 function saveRecords() {
@@ -352,7 +364,7 @@ function clearCurrentMonth() {
 function exportData() {
   const payload = {
     app: "entertainment-invest",
-    version: 3.2,
+    version: 3.3,
     exportedAt: new Date().toISOString(),
     records: state.records
   };
