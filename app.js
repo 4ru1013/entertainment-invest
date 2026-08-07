@@ -357,6 +357,33 @@ el("importData").addEventListener("change", event => {
   event.target.value = "";
 });
 
+
+el("openMainMenu").addEventListener("click", () => {
+  el("mainMenuDialog").showModal();
+});
+
+el("menuExportData").addEventListener("click", () => {
+  el("mainMenuDialog").close();
+  exportData();
+});
+
+el("menuImportData").addEventListener("click", () => {
+  el("mainMenuDialog").close();
+  el("importData").click();
+});
+
+el("menuGoBackup").addEventListener("click", () => {
+  el("mainMenuDialog").close();
+  window.setTimeout(() => {
+    el("backupSection").scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 150);
+});
+
+el("menuClearMonth").addEventListener("click", () => {
+  el("mainMenuDialog").close();
+  el("clearMonthConfirmDialog").showModal();
+});
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("service-worker.js");

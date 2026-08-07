@@ -15,7 +15,7 @@
 <body>
   <main class="app-shell">
     <header class="topbar">
-      <button class="menu-button" aria-label="選單">☰</button>
+      <button id="openMainMenu" class="menu-button" type="button" aria-label="開啟選單">☰</button>
       <button id="monthButton" class="month-button" type="button">
         <span id="monthLabel">2026 年 8 月</span>
         <span class="month-arrow">⌄</span>
@@ -75,7 +75,7 @@
       <div id="expensePanel" class="entry-panel">
         <label>
           <span>日期</span>
-          <input id="expenseDate" type="date" />
+          <div class="date-input-wrap"><input id="expenseDate" type="date" /></div>
         </label>
 
         <label>
@@ -97,7 +97,7 @@
       <div id="investmentPanel" class="entry-panel hidden">
         <label>
           <span>日期</span>
-          <input id="investmentDate" type="date" />
+          <div class="date-input-wrap"><input id="investmentDate" type="date" /></div>
         </label>
 
         <label>
@@ -137,7 +137,7 @@
       <div id="recordList" class="record-list"></div>
     </section>
 
-    <section class="backup-card">
+    <section id="backupSection" class="backup-card">
       <h2>資料備份</h2>
       <p>資料只儲存在這台裝置。清除 Safari 網站資料或更換手機前，請先匯出備份。</p>
       <div class="backup-actions">
@@ -150,10 +150,40 @@
     </section>
   </main>
 
+
+  <dialog id="mainMenuDialog">
+    <form method="dialog" class="dialog-card menu-dialog">
+      <div class="dialog-heading">
+        <h2>選單</h2>
+        <button class="close-button" value="cancel" aria-label="關閉">×</button>
+      </div>
+
+      <button id="menuExportData" class="menu-action" type="button">
+        <span>匯出備份</span>
+        <small>將目前資料存成 JSON 檔</small>
+      </button>
+
+      <button id="menuImportData" class="menu-action" type="button">
+        <span>匯入備份</span>
+        <small>從先前匯出的備份檔復原</small>
+      </button>
+
+      <button id="menuGoBackup" class="menu-action" type="button">
+        <span>前往資料備份</span>
+        <small>查看備份說明與按鈕</small>
+      </button>
+
+      <button id="menuClearMonth" class="menu-action danger-menu-action" type="button">
+        <span>清空本月紀錄</span>
+        <small>刪除目前月份的全部資料</small>
+      </button>
+    </form>
+  </dialog>
+
   <dialog id="monthDialog">
     <form method="dialog" class="dialog-card">
       <h2>選擇月份</h2>
-      <input id="monthPicker" type="month" />
+      <div class="date-input-wrap"><input id="monthPicker" type="month" /></div>
       <div class="dialog-actions">
         <button class="secondary-button" value="cancel">取消</button>
         <button id="applyMonth" class="primary-button" value="default">套用</button>
@@ -175,7 +205,7 @@
 
       <label>
         <span>日期</span>
-        <input id="editDate" type="date" />
+        <div class="date-input-wrap"><input id="editDate" type="date" /></div>
       </label>
 
       <label>
