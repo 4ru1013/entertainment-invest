@@ -66,10 +66,28 @@
       </div>
     </section>
 
+    <section class="cumulative-card">
+      <div class="cumulative-title">轉投資總覽（累積）</div>
+      <div class="cumulative-grid">
+        <div class="cumulative-item">
+          <span>累積娛樂費</span>
+          <strong id="allExpenseTotal">NT$ 0</strong>
+        </div>
+        <div class="cumulative-item">
+          <span>累積股票投入</span>
+          <strong id="allInvestmentTotal">NT$ 0</strong>
+        </div>
+        <div class="cumulative-item">
+          <span>累積完成率</span>
+          <strong id="allCompletionRate">0%</strong>
+        </div>
+      </div>
+    </section>
+
     <section class="entry-card">
       <div class="entry-tabs">
         <button id="expenseEntryTab" class="entry-tab active" type="button">新增娛樂費</button>
-        <button id="investmentEntryTab" class="entry-tab" type="button">紀錄股票投入</button>
+        <button id="investmentEntryTab" class="entry-tab" type="button">＋ 紀錄股票投入</button>
       </div>
 
       <div id="expensePanel" class="entry-panel">
@@ -79,7 +97,7 @@
         </label>
 
         <label>
-          <span>娛樂費金額</span>
+          <span>金額</span>
           <div class="amount-input">
             <input id="expenseAmount" type="number" min="0" inputmode="numeric" placeholder="例如：680" />
             <span>元</span>
@@ -91,7 +109,7 @@
           <input id="expenseNote" type="text" maxlength="60" placeholder="例如：聚餐、電影、演唱會" />
         </label>
 
-        <button id="addExpense" class="primary-button" type="button">加入本月娛樂費</button>
+        <button id="addExpense" class="primary-button" type="button">＋ 加入本月娛樂費</button>
       </div>
 
       <div id="investmentPanel" class="entry-panel hidden">
@@ -113,7 +131,7 @@
           <input id="investmentNote" type="text" maxlength="60" placeholder="例如：0050 零股" />
         </label>
 
-        <button id="addInvestment" class="primary-button" type="button">紀錄股票投入</button>
+        <button id="addInvestment" class="primary-button" type="button">＋ 紀錄股票投入</button>
       </div>
 
       <p id="message" class="message" aria-live="polite"></p>
@@ -137,17 +155,7 @@
       <div id="recordList" class="record-list"></div>
     </section>
 
-    <section id="backupSection" class="backup-card">
-      <h2>資料備份</h2>
-      <p>資料只儲存在這台裝置。清除 Safari 網站資料或更換手機前，請先匯出備份。</p>
-      <div class="backup-actions">
-        <button id="exportData" class="secondary-button" type="button">匯出備份</button>
-        <label class="secondary-button file-label">
-          匯入備份
-          <input id="importData" type="file" accept=".json,application/json" />
-        </label>
-      </div>
-    </section>
+    <input id="importData" class="hidden-file-input" type="file" accept=".json,application/json" />
   </main>
 
 
@@ -168,10 +176,6 @@
         <small>從先前匯出的備份檔復原</small>
       </button>
 
-      <button id="menuGoBackup" class="menu-action" type="button">
-        <span>前往資料備份</span>
-        <small>查看備份說明與按鈕</small>
-      </button>
 
       <button id="menuClearMonth" class="menu-action danger-menu-action" type="button">
         <span>清空本月紀錄</span>

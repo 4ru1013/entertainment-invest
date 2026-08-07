@@ -77,8 +77,20 @@ function calculateTotals() {
   };
 }
 
+function calculateAllTotals() {
+  const expense = state.records
+    .filter(record => record.type === "expense")
+    .reduce((sum, record) => sum + record.amount, 0);
+  const investment = state.records
+    .filter(record => record.type === "investment")
+    .reduce((sum, record) => sum + record.amount, 0);
+  const completion = expense === 0 ? 0 : Math.min(100, Math.round((investment / expense) * 100));
+  return { expense, investment, completion };
+}
+
 function render() {
   const totals = calculateTotals();
+  const allTotals = calculateAllTotals();
   const progress = totals.expense === 0
     ? 0
     : Math.min(100, Math.round((totals.investment / totals.expense) * 100));
@@ -89,6 +101,9 @@ function render() {
   el("pendingTotal").textContent = formatMoney(totals.pending);
   el("progressBar").style.width = `${progress}%`;
   el("progressText").textContent = `本月已完成 ${progress}%`;
+  el("allExpenseTotal").textContent = formatMoney(allTotals.expense);
+  el("allInvestmentTotal").textContent = formatMoney(allTotals.investment);
+  el("allCompletionRate").textContent = `${allTotals.completion}%`;
 
   const completed = totals.expense > 0 && totals.pending === 0;
   el("pendingStatus").textContent = completed ? "本月已補足" : "尚未補足";
@@ -165,9 +180,11 @@ function addRecord(type) {
 
   el(`${prefix}Amount`).value = "";
   el(`${prefix}Note`).value = "";
+  el(`${prefix}Date`).value = todayString();
 
   showMessage(type === "expense" ? "已新增娛樂費。" : "已紀錄股票投入。");
   render();
+  window.setTimeout(() => el(`${prefix}Amount`).focus(), 80);
 }
 
 function setEntryTab(type) {
@@ -264,7 +281,7 @@ function clearCurrentMonth() {
 function exportData() {
   const payload = {
     app: "entertainment-invest",
-    version: 2,
+    version: 3,
     exportedAt: new Date().toISOString(),
     records: state.records
   };
@@ -349,8 +366,6 @@ el("confirmClearMonth").addEventListener("click", event => {
   clearCurrentMonth();
 });
 
-el("exportData").addEventListener("click", exportData);
-
 el("importData").addEventListener("change", event => {
   const file = event.target.files[0];
   if (file) importData(file);
@@ -372,12 +387,6 @@ el("menuImportData").addEventListener("click", () => {
   el("importData").click();
 });
 
-el("menuGoBackup").addEventListener("click", () => {
-  el("mainMenuDialog").close();
-  window.setTimeout(() => {
-    el("backupSection").scrollIntoView({ behavior: "smooth", block: "start" });
-  }, 150);
-});
 
 el("menuClearMonth").addEventListener("click", () => {
   el("mainMenuDialog").close();
