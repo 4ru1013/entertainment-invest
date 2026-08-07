@@ -138,6 +138,7 @@ function render() {
 
   el("monthLabel").textContent =
     `${state.month.getFullYear()} 年 ${state.month.getMonth() + 1} 月`;
+  el("monthPicker").value = monthKey(state.month);
 
   el("expenseTotal").textContent = formatMoney(monthly.expense);
   el("investmentTotal").textContent = formatMoney(monthly.investment);
@@ -364,7 +365,7 @@ function clearCurrentMonth() {
 function exportData() {
   const payload = {
     app: "entertainment-invest",
-    version: 3.3,
+    version: 3.4,
     exportedAt: new Date().toISOString(),
     records: state.records
   };
@@ -423,17 +424,6 @@ el("investmentDetailTab").addEventListener("click", () => setDetailTab("investme
 
 el("addExpense").addEventListener("click", () => addRecord("expense"));
 el("addInvestment").addEventListener("click", () => addRecord("investment"));
-
-el("monthButton").addEventListener("click", () => {
-  const picker = el("monthPicker");
-  picker.value = monthKey(state.month);
-
-  if (typeof picker.showPicker === "function") {
-    picker.showPicker();
-  } else {
-    picker.click();
-  }
-});
 
 el("monthPicker").addEventListener("change", () => {
   const value = el("monthPicker").value;

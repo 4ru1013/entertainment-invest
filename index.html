@@ -9,18 +9,20 @@
   <meta name="apple-mobile-web-app-title" content="娛樂轉投資" />
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="stylesheet" href="style.css?v=3.3" />
+  <link rel="stylesheet" href="style.css?v=3.4" />
   <title>娛樂費轉投資</title>
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <button id="openMainMenu" class="menu-button" type="button" aria-label="開啟選單">☰</button>
-      <button id="monthButton" class="month-button" type="button">
-        <span id="monthLabel">2026 年 8 月</span>
-        <span class="month-arrow">⌄</span>
-        <small>娛樂支出轉為股票投入</small>
-      </button>
+      <div class="month-control">
+        <div class="month-button" aria-hidden="true">
+          <span id="monthLabel">2026 年 8 月</span>
+          <span class="month-arrow">⌄</span>
+        </div>
+        <input id="monthPicker" class="month-picker-overlay" type="month" aria-label="選擇月份" />
+      </div>
       <div class="month-nav">
         <button id="prevMonth" class="icon-button" type="button" aria-label="上一個月">‹</button>
         <button id="nextMonth" class="icon-button" type="button" aria-label="下一個月">›</button>
@@ -183,7 +185,6 @@
       </button>
     </form>
   </dialog>
-  <input id="monthPicker" class="native-month-picker" type="month" aria-label="選擇月份" />
 
 <dialog id="editDialog">
     <form method="dialog" class="dialog-card">
@@ -252,6 +253,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.3"></script>
+  <script src="app.js?v=3.4"></script>
 </body>
 </html>

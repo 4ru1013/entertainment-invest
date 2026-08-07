@@ -697,13 +697,44 @@ body {
 }
 
 
-/* V3.1：月份改用單次原生選擇器 */
-.native-month-picker {
-  position: fixed;
-  left: -9999px;
-  top: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
+
+
+/* V3.4：月份區直接使用透明的原生 iOS month input */
+.month-control {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 48px;
+}
+
+.month-control .month-button {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
   pointer-events: none;
+}
+
+.month-picker-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 48px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0.001;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.month-picker-overlay:focus {
+  outline: none;
+  box-shadow: none;
 }
