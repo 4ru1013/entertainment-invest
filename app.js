@@ -47,6 +47,10 @@ function formatMoney(value) {
   return `NT$ ${Math.round(value).toLocaleString("zh-TW")}`;
 }
 
+function formatPlainAmount(value) {
+  return Math.round(value).toLocaleString("zh-TW");
+}
+
 function monthKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }

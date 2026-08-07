@@ -87,7 +87,7 @@
     <section class="entry-card">
       <div class="entry-tabs">
         <button id="expenseEntryTab" class="entry-tab active" type="button">新增娛樂費</button>
-        <button id="investmentEntryTab" class="entry-tab" type="button">＋ 紀錄股票投入</button>
+        <button id="investmentEntryTab" class="entry-tab" type="button">紀錄股票投入</button>
       </div>
 
       <div id="expensePanel" class="entry-panel">
@@ -131,7 +131,7 @@
           <input id="investmentNote" type="text" maxlength="60" placeholder="例如：0050 零股" />
         </label>
 
-        <button id="addInvestment" class="primary-button" type="button">＋ 紀錄股票投入</button>
+        <button id="addInvestment" class="primary-button" type="button">紀錄股票投入</button>
       </div>
 
       <p id="message" class="message" aria-live="polite"></p>
@@ -183,19 +183,9 @@
       </button>
     </form>
   </dialog>
+  <input id="monthPicker" class="native-month-picker" type="month" aria-label="選擇月份" />
 
-  <dialog id="monthDialog">
-    <form method="dialog" class="dialog-card">
-      <h2>選擇月份</h2>
-      <div class="date-input-wrap"><input id="monthPicker" type="month" /></div>
-      <div class="dialog-actions">
-        <button class="secondary-button" value="cancel">取消</button>
-        <button id="applyMonth" class="primary-button" value="default">套用</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="editDialog">
+<dialog id="editDialog">
     <form method="dialog" class="dialog-card">
       <div class="dialog-heading">
         <div>

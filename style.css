@@ -695,3 +695,15 @@ body {
   .cumulative-item span { font-size:11px; }
   .cumulative-item strong { font-size:clamp(15px,4.3vw,19px); }
 }
+
+
+/* V3.1：月份改用單次原生選擇器 */
+.native-month-picker {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
